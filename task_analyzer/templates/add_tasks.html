@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Add Tasks Page{% endblock %}
+
+{% block content %}
+<div class="container my-3">
+    <h1>Add Task</h1>
+    <form method='post'> 
+        {% csrf_token %}
+  <div class="mb-3">
+      <label for="title" class="form-label">Title</label>
+      <input type="text" name="title" class="form-control" id="title" required>
+    </div>
+  <div class="mb-3">
+      <label for="date" class="form-label">Due Date</label>
+      <input type="date" name="date" class="form-control" id="date" required>
+    </div>
+  <div class="mb-3">
+      <label for="hours" class="form-label">Estimated Hours</label>
+      <input type="number" step="0.1" name="hours" class="form-control" id="hours" required>
+    </div>
+    <div class="mb-3">
+        <label for="importance" class="form-label">importance (1-10)</label>
+        <input type="range" class="form-range" name="importance" value="5" min="1" max="10" id="importance">
+        <output for="range4" id="rangeValue" aria-hidden="true"></output>
+    </div>
+    <div class="mb-3">
+    <label for="dependencies" class="form-label">Select Dependencies</label>
+    <select class="form-select" name="dependencies" multiple aria-label="Select Dependencies" id="dependencies">
+    {% for task in tasks %}
+    <option value="{{task.id}}">{{task.id}} - {{task.title}}</option>
+    {% endfor %}
+    </select>
+    </div>
+    
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+</div>
+
+
+<script>
+  const rangeInput = document.getElementById('importance');
+  const rangeOutput = document.getElementById('rangeValue');
+
+  rangeOutput.textContent = rangeInput.value;
+
+  rangeInput.addEventListener('input', function() {
+    rangeOutput.textContent = this.value;
+  });
+</script>
+{% endblock %}

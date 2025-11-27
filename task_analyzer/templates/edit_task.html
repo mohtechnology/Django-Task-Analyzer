@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+
+<h2>Edit Task</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <label>Title</label>
+    <input type="text" name="title" value="{{ task.title }}" class="form-control">
+
+    <label>Date</label>
+    <input type="date" name="date" value="{{ task.due_date }}" class="form-control">
+
+    <label>Estimated Hours</label>
+    <input type="number" step="0.1" name="hours" value="{{ task.estimated_hours }}" class="form-control">
+
+    <label>Importance</label>
+    <input type="number" name="importance" min="1" max="10" value="{{ task.importance }}" class="form-control">
+
+    <label>Dependencies</label>
+    <select name="dependencies" class="form-select" multiple>
+        {% for t in tasks %}
+        <option value="{{ t.id }}" {% if t in task.dependencies.all %}selected{% endif %}>
+            {{ t.title }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <button class="btn btn-primary mt-3">Save Changes</button>
+</form>
+</div>
+
+{% endblock %}

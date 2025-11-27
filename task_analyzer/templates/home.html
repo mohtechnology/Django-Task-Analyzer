@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Home Page{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-3">Pending Tasks</h1>
+
+    <div class="d-flex align-items-center gap-3 my-3">
+
+        <!-- Dropdown -->
+        <form onchange="this.submit()" method="get" class="m-0">
+            <select class="form-select" name="selection">
+                <option value="system" {% if selection == "system" %}selected{% endif %}>System Recommended</option>
+                <option value="deadline" {% if selection == "deadline" %}selected{% endif %}>Deadline Driven</option>
+                <option value="fastest" {% if selection == "fastest" %}selected{% endif %}>Fastest Wins</option>
+                <option value="important" {% if selection == "important" %}selected{% endif %}>High Impact</option>
+                <option value="balance" {% if selection == "balance" %}selected{% endif %}>Smart Balance</option>
+            </select>
+        </form>
+
+        <button class="btn btn-primary" id="showTop3">
+            Show Top 3
+        </button>
+
+    </div>
+
+
+    <table class="table" id="taskTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Due Date</th>
+                <th>Estimated Hours</th>
+                <th>Importance</th>
+                <th>Dependencies</th>
+                <th>Score</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <th>{{ forloop.counter }}</th>
+                <td>{{ task.title }}</td>
+                <td>{{ task.due_date }}</td>
+                <td>{{ task.estimated_hours }}</td>
+                <td>{{ task.importance }}</td>
+                <td>
+                    {% for dep in task.dependencies.all %}
+                    <span class="badge bg-secondary">{{ dep.title }}</span>
+                    {% empty %}
+                    <span class="text-muted">None</span>
+                    {% endfor %}
+                </td>
+                <td>{{ task.score }}</td>
+                <td>
+
+                <a href="{% url 'edit_task' task.id %}" class="btn btn-warning btn-sm">Edit</a>
+
+                <a href="{% url 'delete_task' task.id %}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+
+<div class="modal fade" id="top3Modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Top 3 Recommended Tasks</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="top3Body">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+document.getElementById("showTop3").addEventListener("click", function () {
+
+    let rows = [...document.querySelectorAll("#taskTable tbody tr")];
+
+    let tasks = rows.map(row => {
+        let title = row.children[1].innerText.trim();
+        let score = parseFloat(row.children[6].innerText.trim());
+        return { title, score };
+    });
+
+    tasks.sort((a, b) => b.score - a.score);
+
+    let top3 = tasks.slice(0, 3);
+
+    let bodyHTML = "<ul class='list-group'>";
+    top3.forEach(t => {
+        bodyHTML += `
+            <li class="list-group-item d-flex justify-content-between">
+                <strong>${t.title}</strong>
+                <span class="badge bg-primary">${t.score}</span>
+            </li>
+        `;
+    });
+    bodyHTML += "</ul>";
+
+    document.getElementById("top3Body").innerHTML = bodyHTML;
+
+    let modal = new bootstrap.Modal(document.getElementById("top3Modal"));
+    modal.show();
+});
+</script>
+
+
+{% endblock %}
